@@ -16,7 +16,6 @@ $latestFiles = Invoke-RestMethod -Uri $latestApiUrl -Headers @{ 'User-Agent' = '
 $installerFile = $latestFiles | Where-Object { $_.name -like "*.installer.yaml" }
 
 # Download and parse YAML content to get the Url of the latest installer file.
-
 $yamlUrl = $installerFile.download_url
 $yamlContent = Invoke-RestMethod -Uri $yamlUrl -Headers @{ 'User-Agent' = 'PowerShell' }
 $yamlString = $yamlContent -join "`n"
