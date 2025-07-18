@@ -1,4 +1,4 @@
-# GitHub API URL for the app manifest.
+# Define the GitHub API URL for the app manifests in winget-pkgs.
 $apiUrl = "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/a/Akiflow/Akiflow"
 
 # Fetch version folders then filter only version folders.
@@ -9,6 +9,8 @@ $versionFolders = $versions | Where-Object { $_.type -eq "dir" }
 $sortedVersions = $versionFolders | ForEach-Object { $_.name } | Sort-Object {[version]$_} -Descending -ErrorAction SilentlyContinue
 $latestVersion = $sortedVersions[0]
 
+Write-Host "Latest Akiflow version: $latestVersion"
+
 # Get contents of the latest version folder to find the .installer.yaml file.
 $latestApiUrl = "$apiUrl/$latestVersion"
 $latestFiles = Invoke-RestMethod -Uri $latestApiUrl -Headers @{ 'User-Agent' = 'PowerShell' }
@@ -17,8 +19,10 @@ $installerFile = $latestFiles | Where-Object { $_.name -like "*.installer.yaml" 
 # Download and parse YAML content to get the Url of the latest installer file.
 $yamlUrl = $installerFile.download_url
 $yamlContent = Invoke-RestMethod -Uri $yamlUrl -Headers @{ 'User-Agent' = 'PowerShell' }
-$yamlString = $yamlContent -join "`n"
-$installerUrl = [regex]::Matches($yamlString, "InstallerUrl:\s+(http[^\s]+)") | ForEach-Object { $_.Groups[1].Value }
+$null = ($yamlContent -join "`n") -match "InstallerUrl:\s+(http.*)"
+$installerUrl = $Matches[1]
+
+Write-Host "Downloading installer from: $installerUrl"
 
 # Download the latest installer to the temp folder.
 $webClient = [System.Net.WebClient]::new()
@@ -29,3 +33,5 @@ Start-Process -FilePath "$env:TEMP\Akiflow-latest.exe" -ArgumentList '/S /NCRC /
 
 # Delete the downloaded installer file.
 Remove-Item -Path "$env:TEMP\Akiflow-latest.exe" -Force -ErrorAction SilentlyContinue
+
+Write-Host "Akiflow installation completed."
