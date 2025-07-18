@@ -10,6 +10,8 @@ $versionFolders = $versions | Where-Object { $_.type -eq "dir" }
 $sortedVersions = $versionFolders | ForEach-Object { $_.name } | Sort-Object {[version]$_} -Descending -ErrorAction SilentlyContinue
 $latestVersion = $sortedVersions[0]
 
+Write-Host "Latest alfaview version: $latestVersion"
+
 # Get contents of the latest version folder to find the .installer.yaml file.
 $latestApiUrl = "$apiUrl/$latestVersion"
 $latestFiles = Invoke-RestMethod -Uri $latestApiUrl -Headers @{ 'User-Agent' = 'PowerShell' }
@@ -22,6 +24,8 @@ $yamlString = $yamlContent -join "`n"
 $installerUrls = [regex]::Matches($yamlString, "InstallerUrl:\s+(http[^\s]+)") | ForEach-Object { $_.Groups[1].Value }
 $installerUrl = $installerUrls[1]
 
+Write-Host "Downloading installer from: $installerUrl"
+
 # Download the latest installer to the temp folder.
 $webClient = [System.Net.WebClient]::new()
 $webClient.DownloadFile($installerUrl, "$env:TEMP\alfaview-latest.msi")
@@ -31,3 +35,5 @@ Start-Process -FilePath msiexec.exe -ArgumentList "/i `"$env:TEMP\alfaview-lates
 
 # Delete the downloaded installer file.
 Remove-Item -Path "$env:TEMP\alfaview-latest.msi" -Force -ErrorAction SilentlyContinue
+
+Write-Host "alfaview installation completed."
