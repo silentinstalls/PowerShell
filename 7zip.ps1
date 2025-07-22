@@ -27,12 +27,12 @@ Write-Host "Downloading installer from: $installerUrl"
 
 # Download the latest installer to the temp folder.
 $webClient = [System.Net.WebClient]::new()
-$webClient.DownloadFile($installerUrl, "$env:TEMP\7zip-latest.exe")
+$webClient.DownloadFile($installerUrl, "$env:TEMP\7-Zip-latest.exe")
 
 # Start the install process.
-Start-Process -FilePath "$env:TEMP\7zip-latest.exe" -ArgumentList '/S' -Wait
+Start-Process -FilePath "$env:TEMP\7-Zip-latest.exe" -ArgumentList '/S' -Wait
 
 # Delete the downloaded installer file.
-Remove-Item -Path "$env:TEMP\7zip-latest.exe" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$env:TEMP\7-Zip-latest.exe" -Force -ErrorAction SilentlyContinue
 
 Write-Host "7-Zip installation completed."
